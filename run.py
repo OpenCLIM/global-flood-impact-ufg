@@ -94,32 +94,24 @@ if not os.path.exists(udm_para_out_path):
 parameter_file = glob(parameters_path + "/*.csv", recursive = True)
 print('parameter_file:', parameter_file)
 
-if len(parameter_file) == 1 :
-    file_path = os.path.splitext(parameter_file[0])
-    print('Filepath:',file_path)
-    filename=file_path[0].split("/")
-    print('Filename:',filename[-1])
-
-    parameters = pd.read_csv(os.path.join(parameters_path + '/' + filename[-1] + '.csv'))
-
-    with open(parameter_file[0]) as file_obj:
-        reader_obj = csv.reader(file_obj)
-        for row in reader_obj:
-            try:
-                if row[0] == 'SSP':
-                    ssp = row[1]
-            except:
-                continue
-            try:
-                if row[0] == 'YEAR':
-                    year = row[1]
-            except:
-                continue
-            try:
-                if row[0] == 'PROJECTION':
-                    projection = row[1]
-            except:
-                continue
+if len(parameter_file) != 0 :
+    all_parameters = pd.concat(map(pd.read_csv,parameter_file),ignore_index=True)
+    print(all_parameters)
+    if 'PROJECTION' in all_parameters.values:
+        projection_row = all_parameters[all_parameters['PARAMETER']=='PROJECTION']
+        projection=projection_row['VALUE'].values[0]
+    else:
+        projection = os.getenv('PROJECTION')
+    if 'SSP' in all_parameters.values:
+        ssp_row = all_parameters[all_parameters['PARAMETER']=='SSP']
+        ssp = ssp_row['VALUE'].values[0]
+    else:
+        ssp = os.getenv('SSP')
+    if 'YEAR' in all_parameters.values:
+        year_row = all_parameters[all_parameters['PARAMETER']=='YEAR']
+        year=year_row['VALUE'].values[0]
+    else:
+        year = os.getenv('YEAR')
 
 if len(parameter_file) == 0 :
     ssp = (os.getenv('SSP'))
